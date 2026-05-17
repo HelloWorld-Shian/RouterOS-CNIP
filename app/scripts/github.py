@@ -166,21 +166,6 @@ def generate_diff_report(current_ipv4, current_ipv6, prev_ipv4, prev_ipv6):
     
     return "\n".join(report_lines)
 
-# def write_rsc(path, items, name):
-#     with open(path, "w", encoding="utf-8") as f:
-#         china_time = get_china_time()
-#         f.write(f"# Generated {china_time.strftime('%Y-%m-%d %H:%M:%S')} (China Time)\n")
-#         f.write(f"# Total entries: {len(items)}\n")
-        
-#         # 根据列表名称决定使用哪个命令
-#         if name == "CN-IPv6":
-#             command_prefix = "/ipv6 firewall address-list add"
-#         else:
-#             command_prefix = "/ip firewall address-list add"
-            
-#         for i in items:
-#             f.write(f"{command_prefix} address={i} list={name}\n")
-
 def write_rsc(path, items, name):
     with open(path, "w", encoding="utf-8") as f:
         china_time = get_china_time()
