@@ -27,7 +27,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # 强制添加被gitignore忽略的文件
           git add -f app/data/*
           # 判断是否有文件变更，无变化直接退出
           if git diff --cached --quiet; then
