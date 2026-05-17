@@ -28,11 +28,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f app/data/*
-          # 判断是否有文件变更，无变化直接退出
           if git diff --cached --quiet; then
             echo "✅ 文件无变化，无需提交"
             exit 0
           fi
-          # 有变化才执行提交
           git commit -m "更新IP地址库"
           git push
