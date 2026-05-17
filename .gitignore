@@ -2,7 +2,6 @@ app/data/*.rsc
 app/data/*.json
 app/data/*.txt
 app/data/*.sha256
-README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
