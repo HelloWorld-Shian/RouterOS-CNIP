@@ -6,69 +6,27 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     permissions:
       contents: write
     steps:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      - name: 配置 Python
+      - name: 配置Python环境
         uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
       - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 生成最新IP规则文件
+        run: python app/scripts/github.py
+
+      - name: 自动提交更新到仓库
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: 生成IP规则文件
-        run: |
-          python app/scripts/github.py
-
-      - name: 检查是否已有版本
-        id: has_release
-        run: |
-          if curl -fsSL https://api.github.com/repos/${{ github.repository }}/releases/latest > /dev/null 2>&1; then
-            echo "EXIST=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "EXIST=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: 下载旧文件对比
-        if: steps.has_release.outputs.EXIST == 'true'
-        run: |
-          mkdir -p old_data
-          wget -q https://github.com/${{ github.repository }}/releases/latest/download/CN-IPv4.rsc -O old_data/CN-IPv4.rsc || true
-          wget -q https://github.com/${{ github.repository }}/releases/latest/download/CN-IPv6.rsc -O old_data/CN-IPv6.rsc || true
-
-      - name: 判断是否需要发布
-        id: check_change
-        run: |
-          if [[ "${{ steps.has_release.outputs.EXIST }}" == "false" ]]; then
-            echo "NEED_RELEASE=true" >> "$GITHUB_OUTPUT"
-          else
-            diff4=$(diff -q app/data/CN-IPv4.rsc old_data/CN-IPv4.rsc 2>/dev/null || true)
-            diff6=$(diff -q app/data/CN-IPv6.rsc old_data/CN-IPv6.rsc 2>/dev/null || true)
-            if [ -z "$diff4" ] && [ -z "$diff6" ]; then
-              echo "NEED_RELEASE=false" >> "$GITHUB_OUTPUT"
-            else
-              echo "NEED_RELEASE=true" >> "$GITHUB_OUTPUT"
-            fi
-          fi
-
-      - name: 生成版本标签
-        if: steps.check_change.outputs.NEED_RELEASE == 'true'
-        id: tag
-        run: echo "TAG=v$(date +'%Y.%m.%d')" >> "$GITHUB_OUTPUT"
-
-      - name: 发布新版本
-        uses: softprops/action-gh-release@v2
-        if: steps.check_change.outputs.NEED_RELEASE == 'true'
-        with:
-          tag_name: ${{ steps.tag.outputs.TAG }}
-          files: app/data/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/data/*
+          git commit -m "更新IP地址库" || exit 0
+          git push
