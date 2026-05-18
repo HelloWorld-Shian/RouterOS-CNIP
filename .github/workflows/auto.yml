@@ -10,7 +10,7 @@ jobs:
       contents: write
     steps:
       - name: 拉取代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: 配置Python环境
         uses: actions/setup-python@v5
