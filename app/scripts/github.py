@@ -183,9 +183,6 @@ def write_rsc(path, items, name):
             f.write(f"{command_prefix} address={i} list={name}\n")
 
 def main():
-
-    import os
-    # 自动在当前项目里创建 app/data 目录
     current_dir = os.path.dirname(os.path.abspath(__file__))
     app_dir = os.path.dirname(current_dir)
     data_dir = os.path.join(app_dir, "data")
@@ -195,14 +192,18 @@ def main():
 
     data = fetch_with_retry(APNIC_STAT_URL)
     current_ipv4, current_ipv6 = parse_and_aggregate(data)
-    
+
     prev_ipv4 = load_previous_data(PREV_IPV4)
     prev_ipv6 = load_previous_data(PREV_IPV6)
-    
+
+    if current_ipv4 == prev_ipv4 and current_ipv6 == prev_ipv6:
+        print("\n✅ IP 列表无变化，跳过生成 RSC 文件")
+        return
+
     diff_report = generate_diff_report(current_ipv4, current_ipv6, prev_ipv4, prev_ipv6)
     with open(DIFF_REPORT_FILE, 'w', encoding='utf-8') as f:
         f.write(diff_report)
-    
+
     print("\n" + "=" * 40)
     print("IP 列表变更摘要")
     print("=" * 40)
@@ -210,32 +211,31 @@ def main():
     print(f"IPv6: {len(prev_ipv6)} → {len(current_ipv6)} ({len(current_ipv6) - len(prev_ipv6):+d})")
     print(f"\n详细报告已保存到: {DIFF_REPORT_FILE}")
     print("=" * 40)
-    
+
     save_previous_data(PREV_IPV4, current_ipv4)
     save_previous_data(PREV_IPV6, current_ipv6)
-    
+
     write_rsc(OUTPUT_IPV4, current_ipv4, "CN-IPv4")
     write_rsc(OUTPUT_IPV6, current_ipv6, "CN-IPv6")
-    
+
     checksums = {
         OUTPUT_IPV4: calculate_sha256(OUTPUT_IPV4),
         OUTPUT_IPV6: calculate_sha256(OUTPUT_IPV6),
         PREV_IPV4: calculate_sha256(PREV_IPV4),
         PREV_IPV6: calculate_sha256(PREV_IPV6)
     }
-    
+
     with open(CHECKSUM_FILE, 'w', encoding='utf-8') as f:
         for file_path, checksum in checksums.items():
             file_name = os.path.basename(file_path)
             f.write(f"{file_name}  {checksum}\n")
-    
-    print(f"\n完成！")
-    print(f"生成文件:")
-    print(f"  {OUTPUT_IPV4} ({len(current_ipv4)} 条)")
-    print(f"  {OUTPUT_IPV6} ({len(current_ipv6)} 条)")
-    print(f"  {CHECKSUM_FILE} (校验和文件)")
-    print(f"  {PREV_IPV4}, {PREV_IPV6} (历史数据)")
 
+    print("\n✅ 生成完成")
+    print("输出文件：")
+    print(f"  • CN-IPv4.rsc ({len(current_ipv4)} 条)")
+    print(f"  • CN-IPv6.rsc ({len(current_ipv6)} 条)")
+    print(f"  • 校验文件: {CHECKSUM_FILE}")
+    print(f"  • 历史快照已更新")
 
 if __name__ == "__main__":
     main()
