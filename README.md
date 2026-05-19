@@ -58,6 +58,6 @@ app/data/
 
 ## 📃 License
 
-Open Source，自由使用。
+MIT
 
 > （注：脚本内容由 AI 生成）
