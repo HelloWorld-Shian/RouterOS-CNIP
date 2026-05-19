@@ -31,9 +31,9 @@ app/data/
 
 ```Plain Text
 
-/tool fetch url="https://raw.githubusercontent.com/HelloWorld-Shian/routerOS-CNIP/main/app/data/CN-IPv4.rsc" dst-path=CN-IPv4.rsc
+/tool fetch url="https://raw.githubusercontent.com/HelloWorld-Shian/routerOS-CNIP/main/app/data/CN-IPv4.rsc" dst-path=CN-IPv4.rsc check-certificate=no
 
-/tool fetch url="https://raw.githubusercontent.com/HelloWorld-Shian/routerOS-CNIP/main/app/data/CN-IPv6.rsc" dst-path=CN-IPv6.rsc
+/tool fetch url="https://raw.githubusercontent.com/HelloWorld-Shian/routerOS-CNIP/main/app/data/CN-IPv6.rsc" dst-path=CN-IPv6.rsc check-certificate=no
 
 /import file=CN-IPv4.rsc 
 /import file=CN-IPv6.rsc 
